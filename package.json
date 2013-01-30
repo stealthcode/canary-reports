@@ -1,0 +1,13 @@
+ {
+    "name": "canary-reporting",
+    "description": "HTTP API and Reporting to the Canary project.",
+    "version": "0.9.1",
+    "private": false,
+    "dependencies": {
+        "express": "3.x",
+        "mongodb": "1.1.11",
+        "underscore": "1.4.2",
+        "winston": "0.6.2",
+        "cron": "1.0.1"
+    }
+}

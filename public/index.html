@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta http-equiv="cache-control" content="max-age=0" />
+        <meta http-equiv="cache-control" content="no-cache" />
+        <meta http-equiv="expires" content="0" />
+        <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+        <meta http-equiv="pragma" content="no-cache" />
+
+        <title>AutoTest Reporting</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/main.css">
+        <script data-main="js/" src="js/vendor/require.js"></script>
+        <script type="text/javascript">
+            require(['main'], function(){
+                require(['viewmodel/debug', 'ko'], 
+                    function(viewmodel, ko) {
+                        ko.applyBindings(viewmodel.testList, document.getElementById("all_tests"));
+                        ko.applyBindings(viewmodel.categoryList, document.getElementById("all_stories"));
+                    }
+                );
+            });
+        </script>
+    </head>
+    <body>
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+        <![endif]-->
+
+        <!-- Add your site or application content here -->
+        <div id='header'>
+            <div id='title'>AutoTest Debug Reporting</div>
+            <div id='nav'>
+                <ul>
+                    <li><a href="/">Debug Reporting</a></li>
+                    <li><a href="/release.html">Release Reporting</a></li>
+                </ul>
+            </div>
+        </div>
+        <div>
+            <div id="all_tests">
+                <!-- ko if: showDetail() -->
+                <h2>All Tests</h2>
+                <!-- /ko -->
+                <!-- ko ifnot: showDetail() -->
+                <h2>Summary</h2>
+                <!-- /ko -->
+                <div class="table-options" data-bind="visible: showDetail()">
+                    <input type="text" data-bind="value: testLimit" class="pageOption" /> per page
+                    <input type="text" data-bind="value: testPage" class="pageOption" /> on page
+                    <button id="fetch_tests" data-bind="click: showTests">Refresh</button>
+                </div>
+                <table class="test-table">
+                    <thead><tr>
+                        <th data-bind="visible: showDetail()"></th>
+                        <th class="host">Host</th>
+                        <th class="target">Target</th>
+                        <th class="start-date">Test Date</th>
+                        <th class="start-time">Time</th>
+                        <th class="pass-fail">P/F</th>
+                    </tr></thead>
+                    <tbody data-bind="foreach: testRows">
+                        <tr data-bind="click: $parent.showStories, css: {testSummaryFailed: failedCount() > 0, testSummaryPassed: failedCount() == 0, testRow: $parent.showDetail()}">
+                            <td data-bind="visible: $parent.showDetail()"><span style="color: #FFF" data-bind="visible: testId == $root.highlightedTestId()"><b>&#8226;</b></span></td>
+                            <td class="host" data-bind="text: scriptHost"></td>
+                            <td class="target" data-bind="text: targetEnv"></td>
+                            <td class="start-date" data-bind="text: start_date"></td>
+                            <td class="start-time" data-bind="text: start_time"></td>
+                            <td class="pass-fail">
+                                <!-- ko ifnot: isInProgress -->
+                                    (<span class="passed" data-bind="text: passedCount"></span>/<span class="failed" data-bind="text: failedCount"></span>)
+                                <!-- /ko  -->
+                                <!-- ko if: isInProgress -->
+                                    (<span class="inProgress" data-bind="text: inProgressCount"></span>) Tests In Progress
+                                <!-- /ko  -->
+                            </td>
+                        </tr>    
+                    </tbody>
+                </table>
+            </div>
+            <div id="all_stories" data-bind="visible: showDetail()">
+                <h2>Test Automation Report</h2>
+                <div data-bind="click: toggleShowTestDetails" class="clickable"><a href="javascript: void(0)">Test Details</a></div>
+                <div class="" data-bind="visible: shouldShowTestDetails, with: selectedTest">
+                    <div>Start Date:&nbsp;<span data-bind="text: start_date"></span></div>
+                    <div>Start Time:&nbsp;<span data-bind="text: start_time"></span></div>
+                    <div>Results:&nbsp;<span data-bind="text: status"></span></div>
+                    <div>Test Host:&nbsp;<span data-bind="text: scriptHost"></span></div>
+                    <div>Target Environment:&nbsp;<span data-bind="text: targetEnv"></span></div>
+                    <table>
+                        <thead><tr>
+                            <th>Application</th><th>Version</th>
+                        </tr></thead>
+                        <tbody data-bind="foreach: targetVersions">
+                            <tr>
+                                <td data-bind="text: app_name"></td>
+                                 <td data-bind="text: version"></td>
+                             </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-options">
+                    <span>Show: </span>
+                    <input type='checkbox' value="failed" data-bind="checked: filters">Failed Stories</input>
+                    <input type='checkbox' value="passed" data-bind="checked: filters">Passed Stories</input>
+                    <input type='checkbox' value="backtrace" data-bind="checked: filters">With Backtrace</input>
+                </div>
+                <!-- ko template: {name: 'category-template', foreach: categories} --><!-- /ko -->
+            </div>
+
+            <script type="text/html" id="category-template">
+                <ul class="categories">
+                    <li class="category">
+                        <span class="subject" data-bind="text: name"></span>
+                        <span class="story-count">
+                            (<span class="passed" data-bind="text: passedCount"></span>/<span class="failed" data-bind="text: failedCount"></span><!-- ko if: inProgressCount > 0 -->/<span class="inProgress" data-bind="text: inProgressCount"></span><!-- /ko  -->)
+                        </span>
+
+                            <!-- ko if: stories().length > 0  && ($root.filters.indexOf('failed') >-1 || $root.filters.indexOf('passed') >-1) -->
+                                <table class="story-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Story Summary</th>
+                                            <th>Start Time</th>
+                                            <th>Duration</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody data-bind="foreach: stories">
+                                        <!-- ko if: ($root.filters.indexOf("passed") > -1 && passed) || ($root.filters.indexOf("failed") > -1 && !passed)-->
+                                            <!-- ko template: { name: 'story-summary'} --><!-- /ko -->
+                                            <!-- ko if: $root.visibleStoryId() == id -->
+                                                <!-- ko template: { name: 'story-details'} --><!-- /ko -->
+                                            <!-- /ko -->
+                                        <!-- /ko -->
+                                    </tbody>
+                                </table>
+                            <!-- /ko -->
+                        <!-- ko template: { name: 'category-template', foreach: subCategories} --><!-- /ko -->
+                    </li>
+                </ul>
+            </script>
+
+            <script type="text/html" id="story-summary">
+                <tr class="story-summary" data-bind="css: { passed: passed }, click: $root.showDetails">
+                    <td class="subject">
+                        <span class="status" data-bind="text: statusText"></span>
+                        (<span class="description" data-bind="text: description"></span>)
+                    </td>
+                    <td class="start-time" data-bind="text: startTime"></td>
+                    <td class="runtime" data-bind="text: runTime"></td>
+                </tr>
+            </script>
+            
+            <script type="text/html" id="story-details">
+                <tr class="story-details">
+                    <td colspan="4">
+                        <div class="exception" data-bind="ifnot: passed">
+                            <span class="label">Exception:</span>
+                            <span class="message" data-bind="text: exception"></span>
+                            <div>
+                                <a href="javascript: return void(0)" data-bind="attr: {href: '/screenshot/'+screenshot_id}" class="screenshot">Screenshot</a>
+                            </div>
+                        </div>
+                        <div>
+                        <div class="label">Tasks</div>
+                            <ol>
+                                <div data-bind="foreach: actions">
+                                    <li>
+                                        <div class="action-method">
+                                            <span data-bind="text: wrappedClass"></span>
+                                            #<span data-bind="text: methodName"></span>
+                                            (<span data-bind="text: arguments"></span>)
+                                        </div>
+                                        <!-- ko foreach: log -->
+                                            <div class="log">
+                                                <span class="features" data-bind="text: features"></span>
+                                                <span class="description" data-bind="text: description"></span>
+                                            </div>
+                                        <!-- /ko -->
+                                        <!-- ko if: result != '' -->
+                                            <div class="action-return" data-bind="text: 'returned '+result"></div>
+                                        <!-- /ko -->
+                                    </li>
+                                </div>
+                            </ol>
+                        </div>
+                        <div data-bind="ifnot: passed">
+                            <!-- ko if: $root.filters.indexOf("backtrace") > -1 -->
+                                <div class="label">Backtrace</div>
+                                <!-- ko foreach: backtrace -->
+                                    <div data-bind="text: $data"></div>
+                                <!-- /ko -->
+                            <!-- /ko -->
+                        </div>
+                    </td>
+                </tr>
+            </script>
+        </div>
+
+        <script src="js/plugins.js"></script>
+
+    </body>
+</html>
