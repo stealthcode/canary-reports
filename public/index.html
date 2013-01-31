@@ -149,7 +149,7 @@
             </script>
 
             <script type="text/html" id="story-summary">
-                <tr class="story-summary" data-bind="css: { passed: passed }, click: $root.showDetails">
+                <tr class="story-summary" data-bind="css: { passed: passed, failed: !passed && !ignored(), ignored: ignored() && !passed }, click: $root.showDetails">
                     <td class="subject">
                         <span class="status" data-bind="text: statusText"></span>
                         (<span class="description" data-bind="text: description"></span>)
@@ -165,6 +165,7 @@
                         <div class="exception" data-bind="ifnot: passed">
                             <span class="label">Exception:</span>
                             <span class="message" data-bind="text: exception"></span>
+                            <a href="javascript: return void(0)" data-bind="ifnot: ignored, click: ignore">Ignore</a>
                             <div>
                                 <a href="javascript: return void(0)" data-bind="attr: {href: '/screenshot/'+screenshot_id}" class="screenshot">Screenshot</a>
                             </div>

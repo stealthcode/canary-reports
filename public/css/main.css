@@ -181,11 +181,20 @@ body {
     color: #222;
 }
 
-.story-summary {
+.story-summary.ignored {
+    background: #ffe200;
+    color: #000;
+}
+.story-summary.ignored:hover {
+    background: #bfb130;
+    color: #000;
+    text-decoration: underline;
+}
+.story-summary.failed {
     background: #a60400;
     color: #ffcf73;
 }
-.story-summary:hover {
+.story-summary.failed:hover {
     background: #ffcf73;
     color: #000;
     text-decoration: underline;

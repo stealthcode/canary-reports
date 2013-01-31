@@ -103,7 +103,8 @@ define(['ko', 'underscore'],
             self.category = jsonObject['category'];
             self.description = jsonObject['description'];
             self.passed = jsonObject['passed'];
-            self.statusText = ko.computed(function() {return self.passed ? "Passed" : "Failed"});
+            self.ignored = ko.observable(jsonObject['ignored']);
+            self.statusText = ko.computed(function() {return self.passed ? "Passed" : self.ignored() ? "Ignored" : "Failed"});
             self.screenshot_id = jsonObject['screenshot_id'];
             self.tasks = jsonObject['tasks'];
             self.fileName = jsonObject['file_name'];
@@ -121,6 +122,24 @@ define(['ko', 'underscore'],
             self.context = _.map(context, function(e){
                 return "&lt;"+e+"&gt;";
             }).sort().join(',&nbsp;');
+            self.ignore = function(story) {
+                $.ajax({
+                    type: 'PUT',
+                    url: '/story/' + story.id,
+                    data: {ignored: true},
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log(data);
+                        story.ignored(true);
+                    },
+                    error: function(xhr, textStatus, err) {
+                        console.log("Failed to update story "+ story.id + ". ");
+                        if (textStatus) 
+                            console.log(textStatus);
+                    }
+                });
+            }
+
         }
 
         function StoryAction(jsonObject) {

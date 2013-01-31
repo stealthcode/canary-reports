@@ -202,3 +202,29 @@ exports.getScreenshot = function(req, res) {
     });
 
 }
+
+exports.updateStory = function(req, res) {
+    var id = req.params.storyId;
+    logger.debug('Derp: '+ id);
+    console.log(req);
+    var property = req.body;
+    var storyId = new BSON.ObjectID(id);
+    logger.debug('Derp2: '+ storyId);
+    if (storyId == undefined || !/\w{24}/.test(storyId)) {
+        res.send({message: 'StoryId must be a 24 character hexadecimal string.', error: 'Invalid Argument'});
+        return;
+    }
+    
+    db.collection('story', function(err, collection) {
+        if (err)
+            res.send({message: 'Cannot connect to "story" collection.', error: err});
+        collection.update({_id: storyId}, {$set: property}, {safe:true}, function(err, item) {
+            if(!err) {
+                res.send({status: 'success'});
+            }
+            else {
+                res.send({message: 'Error updating story with _id "'+id+'".', error: err});
+            }
+        });
+    });
+}

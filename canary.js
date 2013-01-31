@@ -22,6 +22,7 @@ server.get('/test/:limit', persistence.getTest);
 server.get('/test/:limit/:skip', persistence.getTest);
 server.get('/category/:testId', persistence.getCategory);
 server.get('/story', persistence.getStory);
+server.put('/story/:storyId', persistence.updateStory);
 server.get('/story/:testId', persistence.getStory);
 server.get('/story/:testId/:limit', persistence.getStory);
 server.get('/story/:testId/:limit/:skip', persistence.getStory);
