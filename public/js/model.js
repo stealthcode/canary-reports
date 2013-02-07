@@ -50,7 +50,11 @@ define(['ko', 'underscore'],
                             self.wasCancelled ? 'Cancelled' : 'Finished';
             self.passedCount = ko.observable(jsonObject['passed_count'] || 0);
             self.failedCount = ko.observable(jsonObject['failed_count'] || 0);
+            self.ignoredCount = ko.observable(jsonObject['ignored_count'] || 0);
             self.total = jsonObject['story_count'];
+            self.passedRatio = ko.computed(function() {return self.passedCount() / self.total * 100});
+            self.failedRatio = ko.computed(function() {return self.failedCount() / self.total * 100});
+            self.ignoredRatio = ko.computed(function() {return self.ignoredCount() / self.total * 100});
             self.inProgressCount = ko.computed(function() {
                 return self.total - (self.passedCount() + self.failedCount());}
             );
@@ -94,16 +98,18 @@ define(['ko', 'underscore'],
             });
         }
 
-        function Story(jsonObject) {
+        function Story(jsonObject, parentTest) {
             var self = this;
             self.id = jsonObject['_id'];
+            self.test = parentTest;
             self.startTime = parseUTC(jsonObject['start_date']).toLocaleTimeString().split("-")[0];
             self.runTime = jsonObject['run_time'];
             self.showDetails = ko.observable(false);
             self.category = jsonObject['category'];
             self.description = jsonObject['description'];
             self.passed = jsonObject['passed'];
-            self.statusText = ko.computed(function() {return self.passed ? "Passed" : "Failed"});
+            self.ignored = ko.observable(jsonObject['ignored']);
+            self.statusText = ko.computed(function() {return self.passed ? "Passed" : self.ignored() ? "Ignored" : "Failed"});
             self.screenshot_id = jsonObject['screenshot_id'];
             self.tasks = jsonObject['tasks'];
             self.fileName = jsonObject['file_name'];
@@ -121,6 +127,26 @@ define(['ko', 'underscore'],
             self.context = _.map(context, function(e){
                 return "&lt;"+e+"&gt;";
             }).sort().join(',&nbsp;');
+            self.ignore = function(story) {
+                $.ajax({
+                    type: 'PUT',
+                    url: '/story/' + story.id,
+                    data: {ignored: true},
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log(data);
+                        story.ignored(true);
+                        story.test.ignoredCount(story.test.ignoredCount() + 1);
+                        story.test.failedCount(story.test.failedCount() - 1);
+                    },
+                    error: function(xhr, textStatus, err) {
+                        console.log("Failed to update story "+ story.id + ". ");
+                        if (textStatus) 
+                            console.log(textStatus);
+                    }
+                });
+            }
+
         }
 
         function StoryAction(jsonObject) {
@@ -172,7 +198,10 @@ define(['ko', 'underscore'],
         var categoryCache = {};
         var storyCache = {};
 
-        function getCategories(testId, isInProgress, callback) {
+        function getCategories(selectedTest, callback) {
+            var testId = selectedTest.testId;
+            var isInProgress = selectedTest.isInProgress;
+
             if (!categoryCache[testId]) {
                 $.ajax({
                     type: 'GET',
@@ -188,7 +217,7 @@ define(['ko', 'underscore'],
                                 }
                             });
                         });
-                        fetchStories(testId, callback);
+                        fetchStories(selectedTest, callback);
                     }
                 });
             }
@@ -198,7 +227,8 @@ define(['ko', 'underscore'],
                 clearCache(testId);
         }
 
-        function fetchStories(testId, callback) {
+        function fetchStories(selectedTest, callback) {
+            var testId = selectedTest.testId;
             if (!storyCache[testId]) {
                 $.ajax({
                     type: 'GET',
@@ -207,7 +237,7 @@ define(['ko', 'underscore'],
                     success: function(data) {
                         storyCache[testId] = {};
                         _.each(data, function(e) {
-                            var story = new Story(e);
+                            var story = new Story(e, selectedTest);
                             if (storyCache[testId][story.category] == undefined)
                                 storyCache[testId][story.category] = [];
                             storyCache[testId][story.category].push(story);

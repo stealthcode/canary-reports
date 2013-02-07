@@ -24,7 +24,7 @@ define(['model', 'jquery', 'ko', 'underscore'],
 
             self.showTest = function(selectedTest) {
                 self.selectedTest(selectedTest);
-                model.getCategories(selectedTest.testId, selectedTest.isInProgress, renderCategories);
+                model.getCategories(selectedTest, renderCategories);
             }
 
             self.showDetails = function(story) {

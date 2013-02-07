@@ -138,6 +138,7 @@ body {
 .test-table .start-date,
 .test-table .start-time,
 .test-table .pass-fail,
+.test-table .slider,
 .story-table .runtime,
 .story-table .name,
 .story-table .context,
@@ -146,6 +147,24 @@ body {
 .release-table .fail-rate,
 .release-table .story-count {
     border-left: 1px solid #ddd;
+}
+
+.test-table .slider {
+    width: 200px;
+}
+
+.test-table .slider div {
+    height: 16px;
+    float: left;
+}
+.test-table .slider .passed {
+    background: #659a00;
+}
+.test-table .slider .failed {
+    background: #a60400;
+}
+.test-table .slider .ignored {
+    background: #ffe200;
 }
 
 .story-table .runtime {
@@ -181,11 +200,20 @@ body {
     color: #222;
 }
 
-.story-summary {
+.story-summary.ignored {
+    background: #ffe200;
+    color: #000;
+}
+.story-summary.ignored:hover {
+    background: #bfb130;
+    color: #000;
+    text-decoration: underline;
+}
+.story-summary.failed {
     background: #a60400;
     color: #ffcf73;
 }
-.story-summary:hover {
+.story-summary.failed:hover {
     background: #ffcf73;
     color: #000;
     text-decoration: underline;
@@ -206,13 +234,9 @@ body {
 }
 
 .testSummaryPassed {
-    background: #659a00;
-    color: #06276f;
 }
 
 .testSummaryFailed {
-    background: #a60400;
-    color: #ffcf73;    
 }
 
 .testRow:hover, 

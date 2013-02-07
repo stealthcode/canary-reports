@@ -202,3 +202,43 @@ exports.getScreenshot = function(req, res) {
     });
 
 }
+
+exports.updateStory = function(req, res) {
+    var id = req.params.storyId;
+    var property = req.body;
+    var storyId = new BSON.ObjectID(id);
+    if (storyId == undefined || !/\w{24}/.test(storyId)) {
+        res.send({message: 'StoryId must be a 24 character hexadecimal string.', error: 'Invalid Argument'});
+        return;
+    }
+    var storyFilter = {_id: storyId};
+
+    db.collection('story', function(err, collection) {
+        if (err)
+            res.send({message: 'Cannot connect to "story" collection.', error: err});
+        collection.update(storyFilter, {$set: property}, {safe:true}, function(err, item) {
+            if(!err) {
+                var updateRelatedTest = function(storyArray) {
+                    var testId = storyArray[0].test_id;
+                    logger.warn('updating testid = ' + testId);
+                    db.collection('test', function(err, collection) {
+                        if (err)
+                            res.send({message: 'Cannot connect to "test" collection.', error: err});
+                        collection.update({_id: testId}, {$inc: {ignored_count: 1, failed_count : -1}}, {safe:true}, function(err, item) {
+                            if(!err) {
+                                res.send({status: 'success'});
+                            }
+                            else {
+                                res.send({message: 'Error updating test with _id "'+testId+'".', error: err});
+                            }
+                        });
+                    });
+                }
+                query('story', storyFilter, {limit: 1}, updateRelatedTest);
+            }
+            else {
+                res.send({message: 'Error updating story with _id "'+id+'".', error: err});
+            }
+        });
+    });
+}
