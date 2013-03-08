@@ -18,8 +18,9 @@ server.configure(function () {
 
 server.get('/release', persistence.getRelease);
 server.get('/test', persistence.getTest);
+server.get('/test/:host/:limit', persistence.getTest);
 server.get('/test/:limit', persistence.getTest);
-server.get('/test/:limit/:skip', persistence.getTest);
+server.get('/test/:host/:limit/:skip', persistence.getTest);
 server.get('/category/:testId', persistence.getCategory);
 server.get('/story', persistence.getStory);
 server.put('/story/:storyId', persistence.updateStory);

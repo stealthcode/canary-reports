@@ -35,13 +35,14 @@ define(['model', 'jquery', 'ko', 'underscore'],
             }
         }
 
-        function TestPaginatedList(categories) {
+        function TestPaginatedList(categories, selectedHost, limit, page) {
             var self = this;
-            self.testLimit = ko.observable(10);
-            self.testPage = ko.observable(1);
+            self.testLimit = ko.observable(limit || 15);
+            self.testPage = ko.observable(page || 1);
             self.testRows = ko.observableArray([]);
             self.highlightedTestId = ko.observable(0);
             self.showDetail = ko.observable(true);
+            self.selectedHost = ko.observable(selectedHost || "");
 
             function renderChanges(data) {
                 self.testRows.removeAll();
@@ -53,7 +54,10 @@ define(['model', 'jquery', 'ko', 'underscore'],
             }
 
             self.showTests = function() {
-                model.getTests(self.testLimit(), (self.testPage()-1)*self.testLimit(), renderChanges);
+                model.getTests(self.selectedHost(), self.testLimit(), (self.testPage()-1)*self.testLimit(), renderChanges);
+                localStorage.selectedHost = self.selectedHost();
+                localStorage.testLimit = self.testLimit();
+                localStorage.testPage = self.testPage();
             }
 
             self.showStories = function(test) {
@@ -67,27 +71,27 @@ define(['model', 'jquery', 'ko', 'underscore'],
         }
         
         var parameterMap = (function(allParameterPairs) {
-            if (allParameterPairs == "") return {};
-            var allParameters = {};
-            for (var i = 0; i < allParameterPairs.length; ++i)
-            {
-                var pair=allParameterPairs[i].split('=');
-                if (pair.length != 2) continue;
-                allParameters[pair[0]] = decodeURIComponent(pair[1].replace(/\+/g, " "));
-            }
-            return allParameters;
+        if (allParameterPairs == "") return {};
+        var allParameters = {};
+        for (var i = 0; i < allParameterPairs.length; ++i)
+        {
+            var pair=allParameterPairs[i].split('=');
+            if (pair.length != 2) continue;
+            allParameters[pair[0]] = decodeURIComponent(pair[1].replace(/\+/g, " "));
+        }
+        return allParameters;
         })(window.location.search.substr(1).split('&'));
 
         var show = parameterMap["_"] ? false : true;
 
         var categories = new CategoryList();
         categories.showDetail(show);
-        var tests = new TestPaginatedList(categories);
+        var tests = new TestPaginatedList(categories, localStorage.selectedHost, localStorage.testLimit, localStorage.testPage);
         tests.showDetail(show);        
 
         return {
             testList: tests,
-            categoryList: categories
+        categoryList: categories
         }        
     }
 );

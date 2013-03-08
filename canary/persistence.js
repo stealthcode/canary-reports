@@ -141,7 +141,11 @@ exports.getTest = function(req, res) {
     res.setHeader('Cache-Control', 'no-cache');
     var limit = (req.params.limit || '').match(/\d+/) || config.defaults.limit;
     var skip = (req.params.skip || '').match(/\d+/) || 0;
+    var hostFilter = req.params.host;
     filter = {};
+    if (hostFilter)
+        filter.script_host = hostFilter;
+
     query('test', filter, {limit: limit, skip: skip, sort: [['start_date', -1]]}, function(result) {
         res.send(result);
     });

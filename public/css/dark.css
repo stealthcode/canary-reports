@@ -1,0 +1,18 @@
+body {
+    background: #000;
+    color: #ccc;
+}
+
+.test-table .testRow, 
+.release-table .release-row {
+    background: #ccc;
+    color: #333;
+}
+
+ul.categories {
+    background: #333;
+}
+
+.story-table .story-details { 
+    color: #ccc;
+}

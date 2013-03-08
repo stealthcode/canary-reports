@@ -163,10 +163,10 @@ define(['ko', 'underscore'],
             });
         }
 
-        function getTests(limit, skip, callback) {
+        function getTests(host, limit, skip, callback) {
             $.ajax({
                 type: 'GET',
-                url: ['/test', limit, skip].join('/'),
+                url: ['/test', host || '', limit || '', skip || ''].join('/'),
                 dataType: 'json',
                 success: function(data) {
                     var tests = [];

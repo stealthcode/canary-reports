@@ -24,7 +24,7 @@ module.exports = {
             filename: 'node_log.txt', 
             handleExceptions: true,
             json: false,
-            level: 'warn'
+            level: 'info'
         },
         httpAccess: {
             level: 'info'

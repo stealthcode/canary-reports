@@ -14,9 +14,9 @@
 
         <title>AutoTest Reporting</title>
         <meta name="description" content="">
-        <meta name="viewport" content="width=device-width">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/bootstrap.min.css">
         <link rel="stylesheet" href="css/main.css">
         <script data-main="js/" src="js/vendor/require.js"></script>
         <script type="text/javascript">
@@ -36,16 +36,16 @@
         <![endif]-->
 
         <!-- Add your site or application content here -->
-        <div id='header'>
-            <div id='title'>AutoTest Debug Reporting</div>
-            <div id='nav'>
-                <ul>
-                    <li><a href="/">Debug Reporting</a></li>
+        <div class='navbar navbar-inverse'>
+            <div class="navbar-inner">
+                <span class="brand">AutoTest Debug Reporting</span>
+                <ul class="nav">
+                    <li class="active"><a href="/">Debug Reporting</a></li>
                     <li><a href="/release.html">Release Reporting</a></li>
                 </ul>
             </div>
         </div>
-        <div>
+        <div class="container">
             <div id="all_tests">
                 <!-- ko if: showDetail() -->
                 <h2>All Tests</h2>
@@ -54,11 +54,17 @@
                 <h2>Summary</h2>
                 <!-- /ko -->
                 <div class="table-options" data-bind="visible: showDetail()">
-                    <input type="text" data-bind="value: testLimit" class="pageOption" /> per page
-                    <input type="text" data-bind="value: testPage" class="pageOption" /> on page
-                    <button id="fetch_tests" data-bind="click: showTests">Refresh</button>
+                    <span class="span4">
+                        <input type="text" data-bind="value: testLimit" class="pageOption" /> per page
+                        <input type="text" data-bind="value: testPage" class="pageOption" /> on page
+                        <button id="fetch_tests" data-bind="click: showTests">Refresh</button>
+                    </span>
+                    <span class="span4">
+                        <span>Filter To Host</span>
+                        <input type="text" name="host" data-bind="value: selectedHost" />
+                    </span>
                 </div>
-                <table class="test-table">
+                <table class="table test-table">
                     <thead><tr>
                         <th data-bind="visible: showDetail()"></th>
                         <th class="host">Host</th>
@@ -70,18 +76,13 @@
                     </tr></thead>
                     <tbody data-bind="foreach: testRows">
                         <tr data-bind="click: $parent.showStories, css: {testSummaryFailed: failedCount() > 0, testSummaryPassed: failedCount() == 0, testRow: $parent.showDetail()}">
-                            <td data-bind="visible: $parent.showDetail()"><span style="color: #FFF" data-bind="visible: testId == $root.highlightedTestId()"><b>&#8226;</b></span></td>
+                            <td data-bind="visible: $parent.showDetail()"><span data-bind="visible: testId == $root.highlightedTestId()"><b>&#8226;</b></span></td>
                             <td class="host" data-bind="text: scriptHost"></td>
                             <td class="target" data-bind="text: targetEnv"></td>
                             <td class="start-date" data-bind="text: start_date"></td>
                             <td class="start-time" data-bind="text: start_time"></td>
                             <td class="pass-fail">
-                                <!-- ko ifnot: isInProgress -->
-                                    (<span class="passed" data-bind="text: passedCount"></span>/<span class="failed" data-bind="text: failedCount"></span>)
-                                <!-- /ko  -->
-                                <!-- ko if: isInProgress -->
-                                    (<span class="inProgress" data-bind="text: inProgressCount"></span>) Tests In Progress
-                                <!-- /ko  -->
+                                (<span class="passed" data-bind="text: passedCount"></span>/<span class="failed" data-bind="text: failedCount"></span>)<!-- ko if: isInProgress -->*<!-- /ko  -->
                             </td>
                             <td class="slider">
                                 <div class="passed" data-bind="style: {width: passedRatio() + '%'}"></div>
@@ -101,7 +102,7 @@
                     <div>Results:&nbsp;<span data-bind="text: status"></span></div>
                     <div>Test Host:&nbsp;<span data-bind="text: scriptHost"></span></div>
                     <div>Target Environment:&nbsp;<span data-bind="text: targetEnv"></span></div>
-                    <table>
+                    <table class="table">
                         <thead><tr>
                             <th>Application</th><th>Version</th>
                         </tr></thead>
@@ -177,7 +178,7 @@
                             </div>
                         </div>
                         <div>
-                        <div class="label">Tasks</div>
+                        <div>Tasks</div>
                             <ol>
                                 <div data-bind="foreach: actions">
                                     <li>
