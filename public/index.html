@@ -36,16 +36,16 @@
         <![endif]-->
 
         <!-- Add your site or application content here -->
-        <div class='navbar navbar-inverse'>
-            <div class="navbar-inner">
-                <span class="brand">AutoTest Debug Reporting</span>
-                <ul class="nav">
-                    <li class="active"><a href="/">Debug Reporting</a></li>
-                    <li><a href="/release.html">Release Reporting</a></li>
-                </ul>
-            </div>
-        </div>
         <div class="container">
+            <div class='navbar navbar-inverse'>
+                <div class="navbar-inner">
+                    <span class="brand">AutoTest Debug Reporting</span>
+                    <ul class="nav">
+                        <li class="active"><a href="/">Debug Reporting</a></li>
+                        <li><a href="/release.html">Release Reporting</a></li>
+                    </ul>
+                </div>
+            </div>
             <div id="all_tests">
                 <!-- ko if: showDetail() -->
                 <h2>All Tests</h2>
@@ -54,15 +54,13 @@
                 <h2>Summary</h2>
                 <!-- /ko -->
                 <div class="table-options" data-bind="visible: showDetail()">
-                    <span class="span4">
+                    <form action="javscript: void(0);" class="form-inline">
                         <input type="text" data-bind="value: testLimit" class="pageOption" /> per page
                         <input type="text" data-bind="value: testPage" class="pageOption" /> on page
-                        <button id="fetch_tests" data-bind="click: showTests">Refresh</button>
-                    </span>
-                    <span class="span4">
                         <span>Filter To Host</span>
                         <input type="text" name="host" data-bind="value: selectedHost" />
-                    </span>
+                        <a class="btn" id="fetch_tests" data-bind="click: showTests">Search</a>
+                    </form>
                 </div>
                 <table class="table test-table">
                     <thead><tr>
@@ -170,11 +168,15 @@
                 <tr class="story-details">
                     <td colspan="4">
                         <div class="exception" data-bind="ifnot: passed">
-                            <span class="label">Exception:</span>
+                            <span>Exception:</span>
                             <span class="message" data-bind="text: exception"></span>
-                            <a href="javascript: return void(0)" data-bind="ifnot: ignored, click: ignore">Ignore</a>
+                            <div data-bind="ifnot: ignored">
+                                <a href="javascript: return void(0)" data-bind="click: ignore" class="btn">Ignore</a>
+                            </div>
                             <div>
-                                <a href="javascript: return void(0)" data-bind="attr: {href: '/screenshot/'+screenshot_id}" class="screenshot">Screenshot</a>
+                                <a data-bind="attr: {href: '/screenshot/'+screenshot_id}" target="_blank" class="screenshot">
+                                    <img data-bind="attr: {src: '/screenshot/'+screenshot_id}" class="pull-right" />
+                                </a>
                             </div>
                         </div>
                         <div>
@@ -202,7 +204,7 @@
                         </div>
                         <div data-bind="ifnot: passed">
                             <!-- ko if: $root.filters.indexOf("backtrace") > -1 -->
-                                <div class="label">Backtrace</div>
+                                <div>Backtrace</div>
                                 <!-- ko foreach: backtrace -->
                                     <div data-bind="text: $data"></div>
                                 <!-- /ko -->

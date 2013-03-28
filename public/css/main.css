@@ -136,6 +136,11 @@ body {
     text-decoration: underline;
 }
 
+.screenshot img {
+    width: 355px;
+    border: 1px solid #333;
+}
+
 .exception .message {
 
 }
